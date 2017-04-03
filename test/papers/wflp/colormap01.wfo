@@ -1,0 +1,64 @@
+module colormap01
+  ( colormap01.Color (..), colormap01.diff, colormap01.isColor
+  , colormap01.coloring, colormap01.correct, colormap01.goal, colormap01.main )
+  where
+
+import Prelude
+
+data colormap01.Color
+  = colormap01.Red
+  | colormap01.Green
+  | colormap01.Yellow
+
+colormap01.diff :: a -> a -> Prelude.Bool
+colormap01.diff v1 v2 = (v1 == v2) Prelude.=:= Prelude.False
+
+colormap01.isColor :: colormap01.Color -> Prelude.Bool
+colormap01.isColor v1 = fcase v1 of
+    colormap01.Red -> Prelude.success
+    colormap01.Green -> Prelude.success
+    colormap01.Yellow -> Prelude.success
+
+colormap01.coloring
+  ::
+  colormap01.Color -> colormap01.Color -> colormap01.Color -> Prelude.Bool
+colormap01.coloring v1 v2 v3 = (colormap01.isColor v1)
+  &
+  ((colormap01.isColor v2) & (colormap01.isColor v3))
+
+colormap01.correct
+  ::
+  colormap01.Color -> colormap01.Color -> colormap01.Color -> Prelude.Bool
+colormap01.correct v1 v2 v3 = (colormap01.diff v1 v2)
+  &
+  ((colormap01.diff v1 v3) & (colormap01.diff v2 v3))
+
+colormap01.goal
+  ::
+  colormap01.Color -> colormap01.Color -> colormap01.Color -> Prelude.Bool
+colormap01.goal v1 v2 v3 = colormap01._pe0 v1 v2 v3
+
+colormap01.main :: (colormap01.Color,colormap01.Color,colormap01.Color)
+colormap01.main = let v1,v2,v3 free in (colormap01.goal v1 v2 v3) &> (v1,v2,v3)
+
+colormap01._pe0
+  ::
+  colormap01.Color -> colormap01.Color -> colormap01.Color -> Prelude.Bool
+colormap01._pe0 v1 v2 v3 = ((fcase v1 of
+    colormap01.Red -> Prelude.True
+    colormap01.Green -> Prelude.True
+    colormap01.Yellow -> Prelude.True)
+  &
+  ((fcase v2 of
+    colormap01.Red -> Prelude.True
+    colormap01.Green -> Prelude.True
+    colormap01.Yellow -> Prelude.True)
+  &
+  (fcase v3 of
+    colormap01.Red -> Prelude.True
+    colormap01.Green -> Prelude.True
+    colormap01.Yellow -> Prelude.True)))
+  &
+  ((colormap01.diff v1 v2)
+  &
+  ((colormap01.diff v1 v3) & (colormap01.diff v2 v3)))

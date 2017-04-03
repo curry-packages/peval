@@ -1,0 +1,6 @@
+*~
+.curry/
+.cpm
+TestDriver
+*.log
+*.pdf

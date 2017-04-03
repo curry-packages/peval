@@ -1,0 +1,29 @@
+module lopstr07
+  ( lopstr07.sumList, lopstr07.incList, lopstr07.e, lopstr07.goal
+  , lopstr07.main )
+  where
+
+import External
+import Prelude
+
+lopstr07.sumList :: [Prelude.Int] -> Prelude.Int
+lopstr07.sumList v1 = fcase v1 of
+    [] -> 0
+    v2 : v3 -> v2 + (lopstr07.sumList v3)
+
+lopstr07.incList :: Prelude.Int -> [Prelude.Int] -> [Prelude.Int]
+lopstr07.incList v1 v2 = fcase v2 of
+    [] -> []
+    v3 : v4 -> (v3 + v1) : (lopstr07.incList v1 v4)
+
+lopstr07.e :: Prelude.Int
+lopstr07.e = External.e1 + 42
+
+lopstr07.goal :: Prelude.Int -> Prelude.Int -> Prelude.Int
+lopstr07.goal v1 v2 = lopstr07._pe0 v1 v2
+
+lopstr07.main :: Prelude.Int
+lopstr07.main = lopstr07.goal 1 2
+
+lopstr07._pe0 :: Prelude.Int -> Prelude.Int -> Prelude.Int
+lopstr07._pe0 v1 v2 = let { v3 = External.e1 + 42 } in (v1 + v3) + (v2 + v3)

@@ -1,0 +1,16 @@
+{
+    "name": "peval",
+    "version": "1.0.0",
+    "author": "Bjoern Peemoeller <bpe@informatik.uni-kiel.de>",
+    "synopsis": "A partial evaluator for Curry",
+    "category": [ "Analysis", "Optimization" ],
+    "dependencies": { },
+    "executable": {
+        "name": "curry-peval",
+        "main": "peval"
+    },
+    "source": {
+        "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/peval.git",
+        "tag": "$version"
+    }
+}

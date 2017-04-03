@@ -1,0 +1,42 @@
+module last ( (last.++), last.last, last.goal, last.main ) where
+
+import Prelude
+
+(last.++) :: [a] -> [a] -> [a]
+(last.++) v1 v2 = fcase v1 of
+    [] -> v2
+    v3 : v4 -> v3 : (v4 last.++ v2)
+
+last.last :: [a] -> a
+last.last v1 = let v2,v3 free
+  in case ((v2 last.++ (v3 : [])) Prelude.=:= v1) of
+    Prelude.True -> v3
+    Prelude.False -> Prelude.failed
+
+last.goal :: [a] -> a
+last.goal v1 = last._pe0 v1
+
+last.main :: Prelude.Int
+last.main = (last.goal (Prelude.enumFromTo 1 10))
+  ?
+  (last.goal (Prelude.failed : (1 : [])))
+
+last._pe0 :: [a] -> a
+last._pe0 v1 = fcase v1 of
+    v2 : v3 -> fcase v3 of
+        [] -> case (v2 Prelude.=:= v2) of
+            Prelude.True -> v2
+        v4 : v5 -> (fcase v5 of
+            [] -> case ((v2 Prelude.=:= v2) & (v4 Prelude.=:= v4)) of
+                Prelude.True -> v4) ? (let v6 free
+          in case (last._pe1 v2 v4 v6 v5) of
+            Prelude.True -> v6)
+
+last._pe1 :: a -> a -> a -> [a] -> Prelude.Bool
+last._pe1 v1 v2 v3 v4 = fcase v4 of
+    v5 : v6 -> (fcase v6 of
+        [] -> (v1 Prelude.=:= v1)
+          &
+          ((v2 Prelude.=:= v2) & (v3 Prelude.=:= v5))) ? ((v1 Prelude.=:= v1)
+      &
+      (last._pe1 v2 v5 v3 v6))

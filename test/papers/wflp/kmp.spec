@@ -1,0 +1,83 @@
+module kmp
+  ( kmp.Letter (..), kmp.match, kmp.loop, kmp.next, kmp.ite, kmp.eq, kmp.goal
+  , kmp.main, kmp.benchmark )
+  where
+
+import Prelude
+import Profile
+
+data kmp.Letter
+  = kmp.A
+  | kmp.B
+
+kmp.match :: [kmp.Letter] -> [kmp.Letter] -> Prelude.Bool
+kmp.match v1 v2 = kmp.loop v1 v2 v1 v2
+
+kmp.loop
+  ::
+  [kmp.Letter] -> [kmp.Letter] -> [kmp.Letter] -> [kmp.Letter] -> Prelude.Bool
+kmp.loop v1 v2 v3 v4 = fcase v1 of
+    [] -> Prelude.True
+    v5 : v6 -> fcase v2 of
+        [] -> Prelude.False
+        v7 : v8 -> case (kmp.eq v5 v7) of
+            Prelude.True -> kmp.loop v6 v8 v3 v4
+            Prelude.False -> kmp.next v3 v4
+
+kmp.next :: [kmp.Letter] -> [kmp.Letter] -> Prelude.Bool
+kmp.next v1 v2 = fcase v2 of
+    [] -> Prelude.False
+    v3 : v4 -> kmp.loop v1 v4 v1 v4
+
+kmp.ite :: Prelude.Bool -> a -> a -> a
+kmp.ite v1 v2 v3 = fcase v1 of
+    Prelude.True -> v2
+    Prelude.False -> v3
+
+kmp.eq :: kmp.Letter -> kmp.Letter -> Prelude.Bool
+kmp.eq v1 v2 = fcase v1 of
+    kmp.A -> fcase v2 of
+        kmp.A -> Prelude.True
+        kmp.B -> Prelude.False
+    kmp.B -> fcase v2 of
+        kmp.B -> Prelude.True
+        kmp.A -> Prelude.False
+
+kmp.goal :: [kmp.Letter] -> Prelude.Bool
+kmp.goal v1 = kmp._pe0 v1
+
+kmp.main :: [Prelude.Bool]
+kmp.main = Prelude.map
+  kmp.goal
+  ((kmp.A : (kmp.A : (kmp.A : (kmp.B : []))))
+  :
+  ((kmp.A : (kmp.A : (kmp.B : [])))
+  :
+  ((kmp.A : (kmp.A : [])) : ((kmp.B : []) : []))))
+
+kmp.benchmark :: Prelude.IO ()
+kmp.benchmark = let v1 free
+  in (Prelude.doSolve
+  (v1
+  Prelude.=:=
+  ((Prelude.take 200000 (Prelude.repeat kmp.A)) Prelude.++ (kmp.B : []))))
+  Prelude.>>
+  (Profile.profileTimeNF (kmp.goal v1))
+
+kmp._pe0 :: [kmp.Letter] -> Prelude.Bool
+kmp._pe0 v1 = fcase v1 of
+    [] -> Prelude.False
+    v2 : v3 -> fcase v2 of
+        kmp.A -> fcase v3 of
+            [] -> Prelude.False
+            v4 : v5 -> fcase v4 of
+                kmp.A -> kmp._pe1 v5
+                kmp.B -> kmp._pe0 v5
+        kmp.B -> kmp._pe0 v3
+
+kmp._pe1 :: [kmp.Letter] -> Prelude.Bool
+kmp._pe1 v1 = fcase v1 of
+    [] -> Prelude.False
+    v2 : v3 -> fcase v2 of
+        kmp.B -> Prelude.True
+        kmp.A -> kmp._pe1 v3

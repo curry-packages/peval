@@ -1,0 +1,22 @@
+module foldl ( foldl.PEVAL, foldl.foldl, foldl.main ) where
+
+import Prelude
+
+foldl.PEVAL :: a -> a
+foldl.PEVAL v1 = v1
+
+foldl.foldl :: (a -> b -> a) -> a -> [b] -> a
+foldl.foldl v1 v2 v3 = fcase v3 of
+    [] -> v2
+    v4 : v5 -> foldl.foldl v1 (Prelude.apply (Prelude.apply v1 v2) v4) v5
+
+foldl.main :: Prelude.Int
+foldl.main = foldl._pe0
+
+foldl._pe0 :: Prelude.Int
+foldl._pe0 = foldl._pe1 ((1 + 2) + 3) []
+
+foldl._pe1 :: Prelude.Int -> [Prelude.Int] -> Prelude.Int
+foldl._pe1 v1 v2 = fcase v2 of
+    [] -> v1
+    v3 : v4 -> foldl._pe1 (v1 + v3) v4

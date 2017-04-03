@@ -1,0 +1,86 @@
+module base13 ( (base13.++), base13.nonLinear, base13.main ) where
+
+import Prelude
+
+(base13.++) :: [a] -> [a] -> [a]
+(base13.++) v1 v2 = fcase v1 of
+    [] -> v2
+    v3 : v4 -> v3 : (v4 base13.++ v2)
+
+base13.nonLinear :: [a] -> Prelude.Int
+base13.nonLinear v1 = base13._pe0 v1
+
+base13.main :: Prelude.Int
+base13.main = (base13.nonLinear [])
+  ?
+  ((base13.nonLinear (1 : [])) ? (base13.nonLinear (1 : (1 : []))))
+
+base13._pe0 :: [a] -> Prelude.Int
+base13._pe0 v1 = fcase v1 of
+    [] -> 42
+    v2 : v3 -> fcase v3 of
+        v4 : v5 -> fcase v5 of
+            [] -> (v2 Prelude.=:<= v4) &> 42
+            v6 : v7 -> (fcase v7 of
+                v8 : v9 -> fcase v9 of
+                    [] -> ((v2 Prelude.=:<= v6) & (v4 Prelude.=:<= v8))
+                      &>
+                      42) ? ((fcase v7 of
+                v10 : v11 -> fcase v11 of
+                    v12 : v13 -> (fcase v13 of
+                        v14 : v15 -> fcase v15 of
+                            [] -> (v2 Prelude.=:<= v10)
+                              &
+                              ((v4 Prelude.=:<= v12)
+                              &
+                              (v6 Prelude.=:<= v14))) ? ((fcase v13 of
+                        v16 : v17 -> fcase v17 of
+                            v18 : v19 -> fcase v19 of
+                                v20 : v21 -> fcase v21 of
+                                    [] -> (v2 Prelude.=:<= v12)
+                                      &
+                                      ((v4 Prelude.=:<= v16)
+                                      &
+                                      ((v6 Prelude.=:<= v18)
+                                      &
+                                      (v10 Prelude.=:<= v20)))) ? (let v22 free
+                      in (v22 Prelude.=:<= v12)
+                      &
+                      (((v2 : (v4 : (v6 : (v10 : (v22 : []))))) ? (let v23 free
+                      in v23
+                      :
+                      (let v24,v25,v26,v27,v28 free
+                      in ((v24 Prelude.=:<= v2)
+                      &
+                      ((v25 Prelude.=:<= v4)
+                      &
+                      ((v26 Prelude.=:<= v6) & (v27 Prelude.=:<= v10))))
+                      &>
+                      (fcase v28 of
+                        [] -> v24 : (v25 : (v26 : (v27 : (v22 : (v23 : [])))))
+                        v29 : v30 -> v29
+                          :
+                          (fcase v30 of
+                            [] -> v24
+                              :
+                              (v25 : (v26 : (v27 : (v22 : (v23 : (v29 : []))))))
+                            v31 : v32 -> v31
+                              :
+                              (base13._pe1
+                              v32
+                              v24
+                              v25
+                              v26
+                              v27
+                              v22
+                              v23
+                              (v29 : (v31 : v32))))))))
+                      Prelude.=:<=
+                      v13))))
+              &>
+              42)
+
+base13._pe1 :: [a] -> a -> a -> a -> a -> a -> a -> [a] -> [a]
+base13._pe1 v1 v2 v3 v4 v5 v6 v7 v8 = fcase v1 of
+    [] -> v2 : (v3 : (v4 : (v5 : (v6 : (v7 : v8)))))
+    v9 : v10 -> v9 : (base13._pe1 v10 v2 v3 v4 v5 v6 v7 v8)
