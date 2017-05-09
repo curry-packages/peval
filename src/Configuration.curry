@@ -28,6 +28,7 @@ colorModes =
 --- @cons Natural      - see paper yyy
 --- @cons LetRewriting - see paper zzz
 data Semantics = RLNT | Natural | LetRW
+  deriving (Eq,Show)
 
 --- Description and flag of optimization levels
 semantics :: [(Semantics, String, String)]
@@ -46,7 +47,7 @@ semantics =
 ---              translating them to expressions.
 --- Note that only None and WQO really pass the "KMP-test".
 data Abstraction = None | WFO | WQO
- deriving Eq
+ deriving (Eq,Show)
 
 --- Description and flag of abstractions
 abstractions :: [(Abstraction, String, String)]

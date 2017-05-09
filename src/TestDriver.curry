@@ -255,6 +255,7 @@ maxNameLength tests = maximum $ 0 : map (length . getName) tests
 ---                  to the original program. This is really bad!
 --- @cons Error    : The partial evaluation aborted with an internal error.
 data Result = Ok | Custom | Timeout | Failed | NoEval | EvalError | Error
+  deriving (Eq,Show)
 
 --- Colorize a `String` with a given coloring function,
 --- depending on the global coloring mode.
@@ -383,7 +384,7 @@ runTest opts len sem abs (name, mod, specs) = do
   return result
 
 --- Convert a semantics/abstraction to an option name.
-toOption :: a -> String
+toOption :: Show a => a -> String
 toOption = map toLower . show
 
 --- Evaluate a original program and its specialization and compare the results.
