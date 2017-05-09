@@ -62,6 +62,7 @@ defaultOptions = Options
 
 --- Verbosity level.
 data Verbosity = Quiet | Status | Info | Detail | Debug
+ deriving (Eq, Ord)
 
 --- Description and flag of verbosities
 verbosities :: [(Verbosity, String, String)]

@@ -20,7 +20,7 @@ import           Maybe               (isJust)
 type Set a = RBT.RedBlackTree a
 
 --- Return an empty set.
-empty :: Set a
+empty :: Ord a => Set a
 empty = RBT.empty (==) (==) (<)
 
 --- Test for an empty set.
@@ -47,7 +47,7 @@ toList :: Set a -> [a]
 toList = RBT.tree2list
 
 --- Transforms a list of elements into a set.
-fromList :: [a] -> Set a
+fromList :: Ord a => [a] -> Set a
 fromList = foldr insert empty
 
 --- Computes the union of two sets.
@@ -55,9 +55,9 @@ union :: Set a -> Set a -> Set a
 union s1 = foldr insert s1 . toList
 
 --- Computes the intersection of two sets.
-intersect :: Set a -> Set a -> Set a
+intersect :: Ord a => Set a -> Set a -> Set a
 intersect s1 s2 = fromList $ filter (`elem` s2) $ toList s1
 
 --- Test for disjointness of sets.
-disjoint :: Set a -> Set a -> Bool
+disjoint :: Ord a => Set a -> Set a -> Bool
 disjoint s1 s2 = null (intersect s1 s2)

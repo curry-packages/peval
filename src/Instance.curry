@@ -4,7 +4,7 @@
 --- @author  Björn Peemöller
 --- @version April 2015
 --- --------------------------------------------------------------------------
-module Instance (instance, instanceOf, msg) where
+module Instance (instanceWith, instanceOf, msg) where
 
 import List             (find, nub)
 import Maybe            (isJust)
@@ -33,23 +33,23 @@ strictInstanceOf e1 e2 = instanceOf e1 e2 && not (instanceOf e2 e1)
 
 --- Is the first expression a deterministic instance of the second expression?
 detInstanceOf :: Expr -> Expr -> Bool
-detInstanceOf e1 e2 = case instance e1 e2 of
+detInstanceOf e1 e2 = case instanceWith e1 e2 of
   Nothing -> False
   Just s  -> isDetSubst e2 s
 
 --- Is the first expression an instance of the second expression?
 instanceOf :: Expr -> Expr -> Bool
-instanceOf e1 e2 = isJust (instance e1 e2)
+instanceOf e1 e2 = isJust (instanceWith e1 e2)
 
---- `instance e1 e2` tries to compute a substitution `sigma`
+--- `instanceWith e1 e2` tries to compute a substitution `sigma`
 --- such that $e1 = \sigma(e2)$.
 --- If `e1` is an instance of `e2`, the function
 --- returns `Just sigma`, if not then `Nothing` is returned.
 ---
 --- Note that `instance` requires the expressions to share the same structure,
 --- i.e., no normalization is considered.
-instance :: Expr -> Expr -> Maybe Subst
-instance e1 e2 = case instance' re1 re2 of
+instanceWith :: Expr -> Expr -> Maybe Subst
+instanceWith e1 e2 = case instance' re1 re2 of
   Nothing -> Nothing
   Just s  -> let s' = restrict (dom s2) $ compose s1 $ compose s s2
              in assert (subst s  re2 `eqRen` e1) "error in instance"

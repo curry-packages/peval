@@ -17,7 +17,7 @@ sameLength :: [a] -> [b] -> Bool
 sameLength xs ys = length xs == length ys
 
 --- Count the number of occurrences of an element in a list.
-count :: a -> [a] -> Int
+count :: Eq a => a -> [a] -> Int
 count _ []                 = 0
 count x (y:ys) | x == y    = 1 + count x ys
                | otherwise = count x ys
@@ -27,7 +27,7 @@ countBy :: (a -> Bool) -> [a] -> Int
 countBy p xs = length (filter p xs)
 
 --- Check if the two lists are disjoint.
-disjoint :: [a] -> [a] -> Bool
+disjoint :: Eq a => [a] -> [a] -> Bool
 disjoint xs ys = null (intersect xs ys)
 
 --- Drop the last `n` elements from a given list.

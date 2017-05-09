@@ -89,7 +89,7 @@ freeVarsDup (Let     bs e) = concatMap freeVarsDup (e : es) \\\ vs
 freeVarsDup (Typed    e _) = freeVarsDup e
 
 --- List difference with duplicates.
-(\\\) :: [a] -> [a] -> [a]
+(\\\) :: Eq a => [a] -> [a] -> [a]
 xs \\\ ys = filter (`notElem` nub ys) xs
 
 --- Get all used functions in a list of expression, with duplicates.

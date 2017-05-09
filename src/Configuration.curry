@@ -13,6 +13,7 @@ module Configuration where
 --- @cons CMAuto   - Only color when stdout is connected to a terminal
 --- @cons CMNever  - Never color the output.
 data ColorMode = CMAlways | CMAuto | CMNever
+ deriving Eq
 
 --- Description and flag of coloring modes
 colorModes :: [(ColorMode, String, String)]
@@ -45,6 +46,7 @@ semantics =
 ---              translating them to expressions.
 --- Note that only None and WQO really pass the "KMP-test".
 data Abstraction = None | WFO | WQO
+ deriving Eq
 
 --- Description and flag of abstractions
 abstractions :: [(Abstraction, String, String)]

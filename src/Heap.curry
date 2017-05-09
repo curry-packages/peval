@@ -38,6 +38,7 @@ data Binding
   | LazyFree
   | Param
   | LazyParam
+ deriving Eq
 
 --- Pretty printing of a heap binding
 ppBinding :: Binding -> Doc

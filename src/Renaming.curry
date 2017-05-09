@@ -20,7 +20,7 @@ import Utils            (dropLast)
 import FlatCurry.Types
 import FlatCurryGoodies (completePartCall, onBranchExps, sq', getSQ)
 import FlatCurryPretty  (ppExp, indent)
-import Instance         (instance)
+import Instance         (instanceWith)
 import Normalization    (normalizeFreeExpr)
 import Output           (colorWith, traceDetail)
 import PevalBase        (Renaming, ppRenaming, mkFuncCall)
@@ -124,6 +124,6 @@ findInstance :: RenameEnv -> (Expr -> Subst -> Bool) -> Expr -> Maybe Expr
 findInstance env p e = lookupInstance (rnRenaming env)
   where
   lookupInstance []               = Nothing
-  lookupInstance ((e', lhs) : es) = case instance (normalizeFreeExpr e) e' of
+  lookupInstance ((e', lhs) : es) = case instanceWith (normalizeFreeExpr e) e' of
     Just s | p e' s -> Just (subst s (mkFuncCall lhs))
     _               -> lookupInstance es

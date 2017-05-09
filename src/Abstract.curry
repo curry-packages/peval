@@ -25,7 +25,7 @@ import FlatCurryGoodies ( branchExprs, completePartCall, isVar, isConsCall
                         , onBranchExps, prelApply, prelude, samePattern, sq
                         , sq', subExprs, isFailed, funcName, getSQ)
 import FlatCurryPretty  (ppExp, indent)
-import Instance         (instance, instanceOf, msg)
+import Instance         (instanceWith, instanceOf, msg)
 import Normalization    (eqNorm, normalizeExpr)
 import Output           (assert, colorWith, debug, traceDetail)
 import PevalOpts        (Options (optAbstract, optAssert), Abstraction (..))
@@ -374,7 +374,7 @@ closed p q e = case e of
   Typed e' _        -> recClosed q e || recClosed q e'
  where
   recClosed []      _  = False
-  recClosed (q':qs) e' = case instance (complete e') q' of
+  recClosed (q':qs) e' = case instanceWith (complete e') q' of
     Just s  -> allClosed p q (rng s) || recClosed qs e'
     Nothing -> recClosed qs e'
 
