@@ -5,7 +5,7 @@
     "synopsis": "A partial evaluator for Curry",
     "category": [ "Analysis", "Optimization" ],
     "dependencies": {
-        "flatcurry-annotated": ">= 1.0.0"
+        "flatcurry-annotated": ">= 2.0.0"
     },
     "compilerCompatibility": {
         "pakcs": ">= 2.0.0",
