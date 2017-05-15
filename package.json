@@ -4,7 +4,9 @@
     "author": "Bjoern Peemoeller <bpe@informatik.uni-kiel.de>",
     "synopsis": "A partial evaluator for Curry",
     "category": [ "Analysis", "Optimization" ],
-    "dependencies": { },
+    "dependencies": {
+        "flatcurry-annotated": ">= 1.0.0"
+    },
     "compilerCompatibility": {
         "pakcs": ">= 2.0.0",
         "kics2": ">= 2.0.0"
