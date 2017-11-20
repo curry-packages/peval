@@ -15,7 +15,7 @@ module PostUnfold (unAlias, postUnfold, removeCopies) where
 import AnsiCodes        (yellow)
 import Function         (first, second)
 import List             (delete, find, partition)
-import Pretty           (Doc, (<+>), ($$), pPrint, text)
+import Text.Pretty      (Doc, (<+>), ($$), pPrint, text)
 import Utils            (count, countBy)
 
 import FlatCurry.Types

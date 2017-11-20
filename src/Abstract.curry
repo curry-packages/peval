@@ -17,7 +17,7 @@ import AnsiCodes        (yellow)
 import Function         (on, second)
 import List             (delete, find, maximumBy, sum)
 import Maybe            (isJust)
-import Pretty           (Doc, (<+>), ($$), (<>), equals, pPrint, text, vsep)
+import Text.Pretty      (Doc, (<+>), ($$), (<>), equals, pPrint, text, vsep)
 import Utils            (none, sameLength)
 
 import FlatCurry.Types

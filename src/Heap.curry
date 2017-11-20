@@ -15,7 +15,7 @@ module Heap
 
 import Function         (on, second)
 import List             ((\\), nub, partition, sortBy)
-import Pretty           (Doc, (<>), (<+>), char, listSpaced, text)
+import Text.Pretty      (Doc, (<>), (<+>), char, listSpaced, text)
 
 import FlatCurry.Types
 import FlatCurryGoodies (freeVars, liftSQ, mkFree, mkLazyBind, mkLet, pat2exp

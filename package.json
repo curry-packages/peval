@@ -6,7 +6,8 @@
     "category": [ "Analysis", "Optimization" ],
     "dependencies": {
         "flatcurry"          : ">= 2.0.0",
-        "flatcurry-annotated": ">= 2.0.0"
+        "flatcurry-annotated": ">= 2.0.0",
+        "wl-pprint"          : ">= 0.0.1"
     },
     "compilerCompatibility": {
         "pakcs": ">= 2.0.0",

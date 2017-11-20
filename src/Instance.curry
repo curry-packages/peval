@@ -8,7 +8,7 @@ module Instance (instanceWith, instanceOf, msg) where
 
 import List             (find, nub)
 import Maybe            (isJust)
-import Pretty           (pPrint, ($$), text)
+import Text.Pretty      (pPrint, ($$), text)
 import State            ( State, (<$>), (<*>), (>+), (>+=), concatMapS, getsS
                         , mapS, modifyS, returnS, runState)
 import Utils            (disjoint, sameLength)

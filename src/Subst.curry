@@ -11,7 +11,7 @@ module Subst
   ) where
 
 import List             (nub)
-import Pretty           (Doc, (<+>), ($$), rarrow, pPrint, semiBracesSpaced, text)
+import Text.Pretty      (Doc, (<+>), ($$), rarrow, pPrint, semiBracesSpaced, text)
 import Utils            (disjoint)
 
 import FlatCurry.Types

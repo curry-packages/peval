@@ -21,10 +21,9 @@ module PeNatural (pevalExpr) where
 import           AnsiCodes (cyan, magenta)
 import           List      ((\\), elemIndex, find, intersect, isPrefixOf, nub)
 import           Maybe     (fromMaybe, isNothing)
-import           Pretty    (pPrint)
 import qualified Set       (Set, elem, empty, insert, null)
-import Utils               (indentStr)
 
+import Text.Pretty       (pPrint)
 import FlatCurry.Types
 import FlatCurryGoodies
 import FlatCurryPretty   (ppExp)
@@ -34,7 +33,7 @@ import Normalization     (freshRule, simplifyExpr, normalizeFreeExpr)
 import Output            (assert, colorWith, debug, traceDetail)
 import PevalOpts         (Options (..), ProceedMode (..))
 import Subst             (mkSubst, subst)
-import Utils             (count)
+import Utils             (count, indentStr)
 
 --- Partial evaluation.
 --- It is crucial that the free variables of the input expression directly

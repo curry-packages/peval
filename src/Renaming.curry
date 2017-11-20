@@ -14,7 +14,7 @@ import AnsiCodes        (yellow)
 import Function         (second)
 import List             (find)
 
-import Pretty           (($$), (<+>), pPrint, text)
+import Text.Pretty      (($$), (<+>), pPrint, text)
 import Utils            (dropLast)
 
 import FlatCurry.Types

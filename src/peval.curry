@@ -15,7 +15,7 @@ import FilePath                  ( FilePath, (<.>), dropExtension
                                  , replaceBaseName, takeBaseName, takeDirectory)
 import Function                  ((***), first, second)
 import List                      ((\\), find, nub)
-import Pretty                    ( Doc, ($$), (<$+$>), (<+>), char, compose
+import Text.Pretty               ( Doc, ($$), (<$+$>), (<+>), char, compose
                                  , pPrint, vsep, text)
 import System                    (setEnviron)
 

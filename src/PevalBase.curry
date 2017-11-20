@@ -10,7 +10,7 @@ module PevalBase
   , Renaming, ppRenaming
   ) where
 
-import Pretty hiding (indent)
+import Text.Pretty hiding (indent)
 
 import FlatCurry.Types
 import FlatCurryGoodies

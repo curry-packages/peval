@@ -9,9 +9,8 @@
 --- --------------------------------------------------------------------------
 module FlatCurryPretty where
 
-import Pretty
-
 import FlatCurry.Types
+import Text.Pretty
 
 -- ---------------------------------------------------------------------------
 -- Pretty printing of Flat modules

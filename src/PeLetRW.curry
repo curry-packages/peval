@@ -13,7 +13,7 @@ module PeLetRW (pevalExpr) where
 import Function         (second)
 import List             (find, intersect, maximum)
 import Maybe            (fromJust)
-import Pretty           (pPrint)
+import Text.Pretty      (pPrint)
 
 import FlatCurry.Types
 import FlatCurryGoodies
