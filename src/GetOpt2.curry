@@ -6,10 +6,11 @@
 --- @author  Björn Peemöller
 --- @version September 2015
 --- --------------------------------------------------------------------------
-module GetOpt2 (module GetOpt, module GetOpt2) where
+module GetOpt2 (module System.Console.GetOpt, module GetOpt2) where
 
-import GetOpt
-import List   (intercalate, maximum)
+import System.Console.GetOpt
+import Data.List             (intercalate, maximum)
+
 import Utils  (rpad)
 
 --- Type synonym for option and error message

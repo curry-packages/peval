@@ -1,6 +1,6 @@
-import Profile
+import Debug.Profile
 import SetFunctions
-import Unsafe
+import System.IO.Unsafe
 
 perm []     = []
 perm (x:xs) = insert x (perm xs)

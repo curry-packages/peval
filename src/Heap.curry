@@ -13,10 +13,11 @@ module Heap
   , unbind, dereference, without
   ) where
 
-import Function         (on, second)
-import List             ((\\), nub, partition, sortBy)
-import Text.Pretty      (Doc, (<>), (<+>), char, listSpaced, text)
+import Data.Tuple.Extra (second)
+import Data.Function    (on)
+import Data.List        ((\\), nub, partition, sortBy)
 
+import Text.Pretty      (Doc, (<>), (<+>), char, listSpaced, text)
 import FlatCurry.Types
 import FlatCurryGoodies (freeVars, liftSQ, mkFree, mkLazyBind, mkLet, pat2exp
                         , topSQ, patVars, getSQ)

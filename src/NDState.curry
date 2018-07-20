@@ -7,6 +7,8 @@
 --------------------------------------------------------------------------------
 module NDState where
 
+import Prelude hiding ((<$>))
+
 infixl 1 >+, >!, >+=
 infixl 3 <|>
 infixl 4 <$>, <*>

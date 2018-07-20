@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 
 data TreeInt = Leaf Int | Tree Int TreeInt TreeInt
 

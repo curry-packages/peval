@@ -10,15 +10,14 @@ module Subst
   , fmapSubst, substSingle, subst, varSubst, isVariableRenaming, isDetSubst
   ) where
 
-import List             (nub)
-import Text.Pretty      (Doc, (<+>), ($$), rarrow, pPrint, semiBracesSpaced, text)
-import Utils            (disjoint)
+import Data.List        (nub)
 
+import Text.Pretty      (Doc, (<+>), ($$), rarrow, pPrint, semiBracesSpaced, text)
 import FlatCurry.Types
 import FlatCurryGoodies (isConstrTerm, freeVarsDup, isVar, patVars)
 import FlatCurryPretty  (ppVarIndex, ppExp, indent)
 import Output           (assert)
-import Utils            (count)
+import Utils            (count, disjoint)
 
 --- Data type for substitutions
 data Subst = Subst [(VarIndex, Expr)]

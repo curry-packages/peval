@@ -1,6 +1,6 @@
-import Profile
+import Debug.Profile
 import SetFunctions
-import Unsafe
+import System.IO.Unsafe
 
 foldr ::  (a -> b -> b) -> b -> [a] -> b
 foldr _ z []     = z

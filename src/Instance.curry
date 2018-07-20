@@ -6,17 +6,18 @@
 --- --------------------------------------------------------------------------
 module Instance (instanceWith, instanceOf, msg) where
 
-import List             (find, nub)
-import Maybe            (isJust)
-import Text.Pretty      (pPrint, ($$), text)
-import State            ( State, (<$>), (<*>), (>+), (>+=), concatMapS, getsS
-                        , mapS, modifyS, returnS, runState)
-import Utils            (disjoint, sameLength)
+import Data.List        (find, nub)
+import Data.Maybe       (isJust)
+import Control.Applicative
+import Control.Monad.Extra
+import Control.Monad.Trans.State
 
+import Text.Pretty      (pPrint, ($$), text)
 import FlatCurry.Types
 import FlatCurryGoodies ( branchExprs, branchPats, samePattern, freeVars
                         , isConstrTerm, maxVar, patVars, maximumVarIndex)
 import FlatCurryPretty  (ppExp, indent)
+import Utils            (disjoint, sameLength)
 import Normalization    (eqRen, renameExprSubst)
 import Output           (assert)
 import Subst            ( Subst, ppSubst, emptySubst, combine, compose, dom
@@ -44,7 +45,7 @@ instanceOf e1 e2 = isJust (instanceWith e1 e2)
 --- `instanceWith e1 e2` tries to compute a substitution `sigma`
 --- such that $e1 = \sigma(e2)$.
 --- If `e1` is an instance of `e2`, the function
---- returns `Just sigma`, if not then `Nothing` is returned.
+--- return `Just sigma`, if not then `Nothing` is returned.
 ---
 --- Note that `instance` requires the expressions to share the same structure,
 --- i.e., no normalization is considered.
@@ -120,7 +121,7 @@ union (Just s1) (Just s2) = Subst.combine s1 s2
 -- Computation of the most specific generalizer (msg) of two expressions.
 -- -----------------------------------------------------------------------------
 
---- `msg e e' = (g, sigma, theta)` returns the most specific generalization
+--- `msg e e' = (g, sigma, theta)` return the most specific generalization
 --- `g` of `e` and `e'` and the substitutions `sigma` and `theta`,
 --- such that $e = \sigma(g)$, and $e' = \theta(g)$.
 --- A generalizer of two terms $e_1$, $e_2$ is a term $e$,
@@ -160,24 +161,24 @@ initState x = MsgState x []
 
 --- Get a fresh variable
 getFresh :: Msg VarIndex
-getFresh = getsS   msgFresh                       >+= \i ->
-           modifyS (\s -> s { msgFresh = i + 1 }) >+
-           returnS i
+getFresh = do i <- fmap msgFresh get
+              modify (\s -> s { msgFresh = i + 1 })
+              return i
 
 --- Create a new substitution for two expressions
 newSubst :: Expr -> Expr -> Msg Expr
-newSubst e1 e2 = getsS msgSubst >+= \sub ->
-                 getFresh >+= \j ->
-                 modifyS (\s -> s { msgSubst = (j, e1, e2) : sub }) >+
-                 returnS (Var j)
+newSubst e1 e2 = do sub <- fmap msgSubst get
+                    j   <- getFresh
+                    modify (\s -> s { msgSubst = (j, e1, e2) : sub })
+                    return (Var j)
 
 --- Get the substitution for two expressions
 getSubst :: Expr -> Expr -> Msg Expr
 getSubst e1 e2
   | all isConstrTerm [e1, e2]
-  = getsS msgSubst >+= \sub ->
+  = get >>= \s -> let sub = msgSubst s in
     case find (\(_, s1, s2) -> e1 == s1 && e2 == s2) sub of
-      Just (v, _, _) -> returnS (Var v)
+      Just (v, _, _) -> return (Var v)
       Nothing        -> newSubst e1 e2
   | otherwise = newSubst e1 e2
 
@@ -187,46 +188,46 @@ getSubst e1 e2
 --- introduced variables.
 substsUseLocalVars :: [VarIndex] -> [Expr] -> Msg Bool
 substsUseLocalVars vs es =
-  concatMapS substsFor (nub $ concatMap freeVars es) >+= \es' ->
-  returnS $ not $ disjoint vs (nub $ concatMap freeVars es')
+  concatMapM substsFor (nub $ concatMap freeVars es) >>= \es' ->
+  return $ not $ disjoint vs (nub $ concatMap freeVars es')
  where
-  substsFor v = getsS msgSubst >+= \sub ->
+  substsFor v = get >>= \s -> let sub = msgSubst s in
                 case find (\(x, _, _) -> x == v) sub of
-                  Just (_ , e1, e2) -> returnS [e1, e2]
-                  Nothing           -> returnS []
+                  Just (_ , e1, e2) -> return [e1, e2]
+                  Nothing           -> return []
 
 --- Compute the most specific generalization of two expressions.
 msg' :: (Expr, Expr) -> Msg Expr
 msg' p@(ex1, ex2) = case p of
   (Var         x, Var         y) | x == y
-    ->  returnS ex1
+    ->  return ex1
   (Lit         x, Lit         y) | x == y
-    ->  returnS ex1
+    ->  return ex1
   (Comb c1 f1 e1, Comb c2 f2 e2) | c1 == c2 && f1 == f2 && sameLength e1 e2
-    ->  Comb c1 f1 <$> mapS msg' (zip e1 e2)
+    ->  Comb c1 f1 <$> mapM msg' (zip e1 e2)
   (Let    ds1 e1, Let    ds2 e2) | sameLength ds1 ds2
-    ->  mapS msgVar (zip vs1 vs2)                     >+= \vs   ->
+    ->  mapM msgVar (zip vs1 vs2)                     >>= \vs   ->
         let es1' = map (varSubst vs1 vs) es1
             es2' = map (varSubst vs2 vs) es2 in
-        mapS msg' (zip es1' es2')                     >+= \es'  ->
-        msg' (varSubst vs1 vs e1, varSubst vs2 vs e2) >+= \e'   ->
-        substsUseLocalVars vs (e':es')                >+= \used ->
-        if used then getSubst ex1 ex2 else returnS (Let (zip vs es') e')
+        mapM msg' (zip es1' es2')                     >>= \es'  ->
+        msg' (varSubst vs1 vs e1, varSubst vs2 vs e2) >>= \e'   ->
+        substsUseLocalVars vs (e':es')                >>= \used ->
+        if used then getSubst ex1 ex2 else return (Let (zip vs es') e')
     where (vs1, es1) = unzip ds1
           (vs2, es2) = unzip ds2
   (Free    xs e1, Free    ys e2) | sameLength xs ys
-    ->  mapS msgVar (zip xs ys)                     >+= \zs   ->
-        msg' (varSubst xs zs e1, varSubst ys zs e2) >+= \e'   ->
-        substsUseLocalVars zs [e']                  >+= \used ->
-        if used then getSubst ex1 ex2 else returnS (Free zs e')
+    ->  mapM msgVar (zip xs ys)                     >>= \zs   ->
+        msg' (varSubst xs zs e1, varSubst ys zs e2) >>= \e'   ->
+        substsUseLocalVars zs [e']                  >>= \used ->
+        if used then getSubst ex1 ex2 else return (Free zs e')
   (Or      x1 y1, Or      x2 y2)
     ->  Or <$> msg' (x1, x2) <*> msg' (y1, y2)
   (Case c1 e1 b1, Case c2 e2 b2) | c1 == c2 && samePattern b1 b2
-    ->  msg' (e1, e2)              >+= \e  ->
-        mapS msgBranch (zip b1 b2) >+= \bs ->
+    ->  msg' (e1, e2)              >>= \e  ->
+        mapM msgBranch (zip b1 b2) >>= \bs ->
         let vs = nub $ concatMap patVars (branchPats bs) in
-        substsUseLocalVars vs (branchExprs bs) >+= \used ->
-        if used then getSubst ex1 ex2 else returnS $ Case c1 e bs
+        substsUseLocalVars vs (branchExprs bs) >>= \used ->
+        if used then getSubst ex1 ex2 else return $ Case c1 e bs
   (Typed  x1 ty1, Typed  x2 ty2)
     | ty1 == ty2                 -> flip Typed ty1 <$> msg' (x1, x2)
   (_            , _            ) -> getSubst ex1 ex2
@@ -235,7 +236,7 @@ msg' p@(ex1, ex2) = case p of
 msgBranch :: (BranchExpr, BranchExpr) -> Msg BranchExpr
 msgBranch (Branch p1 e1, Branch p2 e2) = case (p1, p2) of
   (LPattern l  , LPattern   _) -> Branch (LPattern l) <$> msg' (e1, e2)
-  (Pattern c xs, Pattern _ ys) -> mapS msgVar (zip xs ys) >+= \zs ->
+  (Pattern c xs, Pattern _ ys) -> mapM msgVar (zip xs ys) >>= \zs ->
                                   Branch (Pattern c zs) <$>
                                   let e1' = varSubst xs zs e1
                                       e2' = varSubst ys zs e2
@@ -245,4 +246,4 @@ msgBranch (Branch p1 e1, Branch p2 e2) = case (p1, p2) of
 --- Compute the most specific generalization
 --- of two locally introduced variables.
 msgVar :: (VarIndex, VarIndex) -> Msg VarIndex
-msgVar (x, y) = if x == y then returnS x else getFresh
+msgVar (x, y) = if x == y then return x else getFresh

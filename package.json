@@ -1,13 +1,13 @@
 {
     "name": "peval",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "author": "Bjoern Peemoeller <bjp@informatik.uni-kiel.de>",
     "synopsis": "A partial evaluator for Curry",
     "category": [ "Analysis", "Optimization" ],
     "dependencies": {
-        "flatcurry"          : ">= 2.0.0",
-        "flatcurry-annotated": ">= 2.0.0",
-        "wl-pprint"          : ">= 0.0.1"
+        "flatcurry"          : ">= 3.0.0",
+        "flatcurry-annotated": ">= 3.0.0",
+        "wl-pprint"          : ">= 2.0.0"
     },
     "compilerCompatibility": {
         "pakcs": ">= 2.0.0",

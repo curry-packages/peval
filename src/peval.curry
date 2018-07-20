@@ -9,17 +9,17 @@
 --- ----------------------------------------------------------------------------
 module peval (main) where
 
-import AnsiCodes                 (green)
-import Distribution              (inCurrySubdir)
-import FilePath                  ( FilePath, (<.>), dropExtension
+import System.Console.ANSI.Codes (green)
+import System.FilePath           ( FilePath, (<.>), dropExtension
                                  , replaceBaseName, takeBaseName, takeDirectory)
-import Function                  ((***), first, second)
-import List                      ((\\), find, nub)
-import Text.Pretty               ( Doc, ($$), (<$+$>), (<+>), char, compose
-                                 , pPrint, vsep, text)
-import System                    (setEnviron)
+import System.Environment        (setEnv)
+import Data.Tuple.Extra          ((***), first, second)
+import Data.List                 ((\\), find, nub)
+import Distribution              (inCurrySubdir)
 
-import FlatCurry.Annotated.Goodies (unAnnFuncDecl)
+import Text.Pretty                       ( Doc, ($$), (<$+$>), (<+>), char
+                                         , compose, pPrint, vsep, text)
+import FlatCurry.Annotated.Goodies       (unAnnFuncDecl)
 import FlatCurry.Annotated.TypeInference (TypeEnv, inferNewFunctions)
 
 import Abstract                  (abstract)
@@ -57,7 +57,7 @@ spec :: Options -> FilePath -> IO ()
 spec opts f = do
   -- we set the path to allow imports located
   -- in the directory of the file for type checking
-  setEnviron "CURRYPATH" (takeDirectory f)
+  setEnv "CURRYPATH" (takeDirectory f)
   readFlatCurry (dropExtension f) >>= specPE opts >>= writeSpec opts f
 
 --- Write the specialised program to the destination file.

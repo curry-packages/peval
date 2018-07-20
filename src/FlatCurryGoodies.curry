@@ -6,12 +6,13 @@
 --- ----------------------------------------------------------------------------
 module FlatCurryGoodies where
 
-import Function        (second)
-import List            (nub, union, maximum)
-import Maybe           (isJust)
-import Utils           (disjoint)
+import Data.Tuple.Extra (second)
+import Data.List        (nub, union, maximum)
+import Data.Maybe       (isJust)
 
 import FlatCurry.Types
+
+import Utils            (disjoint)
 
 -- ---------------------------------------------------------------------------
 -- Functions on programs and function/type declarations

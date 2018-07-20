@@ -6,7 +6,7 @@
 --- ----------------------------------------------------------------------------
 module Utils where
 
-import List (intercalate, intersect)
+import Data.List (intercalate, intersect)
 
 --- Does no element satisfy the predicate?
 none :: (a -> Bool) -> [a] -> Bool

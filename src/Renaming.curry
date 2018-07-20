@@ -10,16 +10,15 @@
 --- ----------------------------------------------------------------------------
 module Renaming (renameExpr) where
 
-import AnsiCodes        (yellow)
-import Function         (second)
-import List             (find)
+import System.Console.ANSI.Codes (yellow)
+import Data.Tuple.Extra          (second)
+import Data.List                 (find)
 
 import Text.Pretty      (($$), (<+>), pPrint, text)
-import Utils            (dropLast)
-
 import FlatCurry.Types
 import FlatCurryGoodies (completePartCall, onBranchExps, sq', getSQ)
 import FlatCurryPretty  (ppExp, indent)
+import Utils            (dropLast)
 import Instance         (instanceWith)
 import Normalization    (normalizeFreeExpr)
 import Output           (colorWith, traceDetail)

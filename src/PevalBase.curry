@@ -11,7 +11,6 @@ module PevalBase
   ) where
 
 import Text.Pretty hiding (indent)
-
 import FlatCurry.Types
 import FlatCurryGoodies
 import FlatCurryPretty

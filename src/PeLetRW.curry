@@ -10,19 +10,18 @@
 --- --------------------------------------------------------------------------
 module PeLetRW (pevalExpr) where
 
-import Function         (second)
-import List             (find, intersect, maximum)
-import Maybe            (fromJust)
-import Text.Pretty      (pPrint)
+import Data.Tuple.Extra (second)
+import Data.List        (find, intersect, maximum)
+import Data.Maybe       (fromJust)
+import Control.Monad.Trans.State
 
+import Text.Pretty      (pPrint)
 import FlatCurry.Types
 import FlatCurryGoodies
 import FlatCurryPretty  (ppExp)
 import Normalization    (freshRule)
 import Output           (traceDetail)
 import PevalOpts        (Options)
-import State            ( State, (>+=), (>+), (<$>), evalState, getS, getsS
-                        , mapS, modifyS, returnS, putS)
 import Subst            (mkSubst, subst, singleSubst, varSubst)
 
 pevalExpr :: Options -> Prog -> Expr -> Expr
@@ -44,32 +43,33 @@ data PEvalState = PEState Options [FuncDecl] Int Int
 type PEM a = State PEvalState a
 
 getOpts :: PEM Options
-getOpts = getsS $ \ (PEState o _ _ _) -> o
+getOpts = fmap (\(PEState o _ _ _) -> o) get
 
 lookupRule :: QName -> PEM (Maybe Rule)
 lookupRule f
-  = getsS (\(PEState _ fs _ _) -> find (hasName f) fs) >+= \mbFunc ->
-    returnS $ case mbFunc of
-      Nothing              -> Nothing
-      Just (Func _ _ _ _r) -> Just r
+  = do PEState _ fs _ _ <- get
+       let mbFunc = find (hasName f) fs
+       return $ case mbFunc of
+         Nothing              -> Nothing
+         Just (Func _ _ _ _r) -> Just r
 
 incrRenamingIndex :: Int -> PEM Int
 incrRenamingIndex j
-  = getS >+= \(PEState o fs i d) -> putS (PEState o fs (i + j) d) >+ returnS i
+  = get >>= \(PEState o fs i d) -> put (PEState o fs (i + j) d) >> return i
 
 incrDepth :: PEM ()
-incrDepth = modifyS $ \(PEState o fs i d) -> PEState o fs i (d + 1)
+incrDepth = modify $ \(PEState o fs i d) -> PEState o fs i (d + 1)
 
 -- local criteria if we can proceed unfolding a call in a given state
 proceed :: PEM Bool
-proceed = getsS $ \(PEState _ _ _ d) -> d < 1
+proceed = fmap (\(PEState _ _ _ d) -> d < 1) get
 
 orElse :: PEM a -> PEM a -> PEM a
-orElse act alt = proceed >+= \should ->
-  if should then incrDepth >+ act else alt
+orElse act alt = proceed >>= \should ->
+  if should then incrDepth >> act else alt
 
 traceM :: String -> PEM a -> PEM a
-traceM msg x = getOpts >+= \opts -> traceDetail opts msg x
+traceM msg x = getOpts >>= \opts -> traceDetail opts msg x
 
 -- ---------------------------------------------------------------------------
 -- Partial evaluation
@@ -81,8 +81,8 @@ traceM msg x = getOpts >+= \opts -> traceDetail opts msg x
 peval :: Expr -> PEM Expr
 peval x = traceM ("pe: " ++ pPrint (ppExp x)) (peval' x)
   where
-  peval' v@(Var        _) = returnS v      -- (VAR)
-  peval' l@(Lit        _) = returnS l      -- (LIT)
+  peval' v@(Var        _) = return v      -- (VAR)
+  peval' l@(Lit        _) = return l      -- (LIT)
   peval' c@(Comb ct f es) = case getSQ c of
     Just e -> peval e        -- (SQ)
     _      -> peComb ct f es -- (COMB)
@@ -94,35 +94,35 @@ peval x = traceM ("pe: " ++ pPrint (ppExp x)) (peval' x)
 
 --- partial evaluation of combination
 peComb :: CombType -> QName -> [Expr] -> PEM Expr
-peComb ct f es = splitArgs es >+= \(ds', es') ->
+peComb ct f es = splitArgs es >>= \(ds', es') ->
   if null ds'
     then case ct of
       FuncCall -> peFuncCall f es                 -- (FUNC)
-      _        -> Comb ct f <$> mapS peval es -- (CONS, PARTC, PARTF)
+      _        -> Comb ct f <$> mapM peval es -- (CONS, PARTC, PARTF)
     else peval (Let ds' (Comb ct f es'))
 
 splitArgs :: [Expr] -> PEM ([(VarIndex, Expr)], [Expr])
-splitArgs []     = returnS ([], [])
+splitArgs []     = return ([], [])
 splitArgs (e:es)
-  | isVar e   = splitArgs es >+= \(ds', es') -> returnS (ds', e : es')
-  | otherwise = incrRenamingIndex 1 >+= \newVar ->
-                splitArgs es >+= \(ds', es') ->
-                returnS ((newVar, e) : ds', Var newVar : es')
+  | isVar e   = splitArgs es >>= \(ds', es') -> return (ds', e : es')
+  | otherwise = incrRenamingIndex 1 >>= \newVar ->
+                splitArgs es >>= \(ds', es') ->
+                return ((newVar, e) : ds', Var newVar : es')
 
 --- partial evaluation of function application (Fapp).
 peFuncCall :: QName -> [Expr] -> PEM Expr
 peFuncCall f es
-  = lookupRule f >+= \mbRule -> case mbRule of
+  = lookupRule f >>= \mbRule -> case mbRule of
       Nothing -> peBuiltin f es
-      Just r  -> (unfold r es >+= peval)
-                 `orElse` returnS (topSQ (Comb FuncCall f es))
+      Just r  -> (unfold r es >>= peval)
+                 `orElse` return (topSQ (Comb FuncCall f es))
 
 --- unfolding of right-hand-side.
 unfold :: Rule -> [Expr] -> PEM Expr
 unfold r@(Rule _ e) es
-  = incrRenamingIndex (maxVarIndex e) >+= \renIndex ->
+  = incrRenamingIndex (maxVarIndex e) >>= \renIndex ->
     let Rule vs' e' = freshRule renIndex r
-    in  returnS (subst (mkSubst vs' es) e')
+    in  return (subst (mkSubst vs' es) e')
 unfold (External _) _ = error "PeLetRW.unfold: external"
 
 --- partial evaluation of let expression.
@@ -130,16 +130,16 @@ peLet :: [(VarIndex, Expr)] -> Expr -> PEM Expr
 peLet ds e = case e of
     -- (LET-VAR)
     Var v               -> case lookup v ds of
-                             Nothing -> returnS e
+                             Nothing -> return e
                              Just  b -> peval (Let ds b)
-                                        `orElse` returnS (topSQ (Let ds e))
+                                        `orElse` return (topSQ (Let ds e))
     -- (LET-LIT)
-    Lit _               -> returnS e
+    Lit _               -> return e
     -- (LET-CONS)
     Comb ConsCall c es  -> peval $ Comb ConsCall c (map (Let ds) es)
     Comb FuncCall _ _
       -- (LET-FAILED)
-      | e == failedExpr -> returnS failedExpr
+      | e == failedExpr -> return failedExpr
       -- (LET-EVAL-1)
       | otherwise        -> case getSQ e of
         -- (LET-SQ)
@@ -151,7 +151,7 @@ peLet ds e = case e of
     Let ds' e'           -> peval $ Let (ds ++ ds') e'
     -- (LET-FREE)
     Free vs e'           ->
-      incrRenamingIndex (maxVar vs) >+= \renIndex ->
+      incrRenamingIndex (maxVar vs) >>= \renIndex ->
       let vs' = map (+ renIndex) vs
       in  peval $ Free vs' (Let ds (varSubst vs vs' e'))
     -- (LET-OR)
@@ -161,41 +161,41 @@ peLet ds e = case e of
     -- (LET-TYPED)
     Typed e' ty          -> peval (Typed (Let ds e') ty)
     -- (CASE-FUNPAT)
-  where letEval = peval e >+= \e' ->
+  where letEval = peval e >>= \e' ->
                   let let' = Let ds e' in
-                  if e == e' then returnS let' else peval let'
+                  if e == e' then return let' else peval let'
 
 --- partial evaluation of free variables (FREE).
 --- If we could make some progress in evaluating the subject expression,
 --- we strip unused free variables and proceed with partial evaluation.
 peFree :: [VarIndex] -> Expr -> PEM Expr
-peFree vs e = peval e >+= \e' ->
+peFree vs e = peval e >>= \e' ->
               let vs'   = vs `intersect` freeVars e'
                   free' = if null vs' then e' else Free vs' e' in
-              if e' /= e then peval free' else returnS free'
+              if e' /= e then peval free' else return free'
 
 --- Partial evaluation of non-deterministic choice (OR).
 peOr ::  Expr -> Expr -> PEM Expr
 peOr e1 e2
   | e1 == failedExpr = peval e2
   | e2 == failedExpr = peval e1
-  | otherwise = peval e1 >+= \e1' ->
+  | otherwise = peval e1 >>= \e1' ->
                 if e1' /= e1
                   then peval (Or e1' e2)
-                  else peval e2 >+= \e2' ->
+                  else peval e2 >>= \e2' ->
                     if e2' /= e2
                     then peval (Or e1 e2')
-                    else returnS (Or e1 e2)
+                    else return (Or e1 e2)
 
 --- Partial evaluation of case expressions.
 peCase :: CaseType -> Expr -> [BranchExpr] -> PEM Expr
 peCase ct subj bs = case subj of
   -- (CASE-VAR)
-  Var v                  -> Case ct subj <$> mapS peBranch bs
+  Var v                  -> Case ct subj <$> mapM peBranch bs
     where peBranch (Branch p be) = Branch p <$>
                                    peval (subst (singleSubst v (pat2exp p)) be)
   -- (CASE-LIT)
-  Lit l                  -> returnS $ matchLit bs
+  Lit l                  -> return $ matchLit bs
     where
     matchLit []                            = failedExpr
     matchLit (Branch (LPattern p) e : bes)
@@ -214,7 +214,7 @@ peCase ct subj bs = case subj of
       = error "PartEval.peCase.matchCons: Literal pattern"
   Comb FuncCall _ _
       -- (CASE-FAILED)
-    | subj == failedExpr     -> returnS failedExpr
+    | subj == failedExpr     -> return failedExpr
       -- (CASE-EVAL-1)
     | otherwise              -> case getSQ subj of
       -- (CASE-SQ)
@@ -227,7 +227,7 @@ peCase ct subj bs = case subj of
   Let _ _                    -> caseEval
   -- (CASE-FREE)
   Free vs e                  ->
-    incrRenamingIndex (maxVar vs) >+= \renIndex ->
+    incrRenamingIndex (maxVar vs) >>= \renIndex ->
     let vs' = map (+ renIndex) vs
     in  peval $ Free vs' (Case ct (varSubst vs vs' e) bs)
   -- (CASE-OR)
@@ -240,9 +240,9 @@ peCase ct subj bs = case subj of
   -- (CASE-TYPED)
   Typed e _                  -> peval (Case ct e bs)
 
- where caseEval = peval subj >+= \subj' ->
+ where caseEval = peval subj >>= \subj' ->
                   let case' = Case ct subj' bs in
-                  if subj == subj' then returnS case' else peval case'
+                  if subj == subj' then return case' else peval case'
 
 -- ---------------------------------------------------------------------------
 -- Builtin functions
@@ -258,7 +258,7 @@ peBuiltin f es
   | f == prelUni       = peBuiltinUni   f es
   | f == prelAmp       = peBuiltinCAnd  f es
   | f `elem` arithOps  = peBuiltinArith f es
-  | otherwise          = returnS $ Comb FuncCall f es
+  | otherwise          = return $ Comb FuncCall f es
   where arithOps = [ prelTimes, prelPlus, prelMinus
                    , prelLt, prelGt, prelLeq, prelGeq]
 
@@ -280,13 +280,13 @@ peBuiltInCond f es = case es of
 -- Equality
 peBuiltinEq :: QName -> [Expr] -> PEM Expr
 peBuiltinEq f es = let es' = map delSQ es in case es' of
-  [Lit l1              , Lit l2              ] -> returnS $ mkBool (l1 == l2)
+  [Lit l1              , Lit l2              ] -> return $ mkBool (l1 == l2)
   [Comb ConsCall c1 es1, Comb ConsCall c2 es2]
     | c1 == c2  -> peval $ mkConjunction f prelAnd trueExpr es1 es2
-    | otherwise -> returnS falseExpr
+    | otherwise -> return falseExpr
   [_, _]
-    | all (== trueExpr) es' -> returnS trueExpr
-    | any (==  failedExpr) es' -> returnS failedExpr
+    | all (== trueExpr) es' -> return trueExpr
+    | any (==  failedExpr) es' -> return failedExpr
     | otherwise                -> peArgs f es [1,2]
   _ -> error "PartEval.peBuiltinEq"
 
@@ -294,14 +294,14 @@ peBuiltinEq f es = let es' = map delSQ es in case es' of
 peBuiltinUni :: QName -> [Expr] -> PEM Expr
 peBuiltinUni f es = let es' = map delSQ es in case es' of
   [Lit l1              , Lit l2              ]
-    | l1 == l2  -> returnS trueExpr
-    | otherwise -> returnS failedExpr
+    | l1 == l2  -> return trueExpr
+    | otherwise -> return failedExpr
   [Comb ConsCall c1 es1, Comb ConsCall c2 es2]
     | c1 == c2  -> peval $ mkConjunction f prelAmp trueExpr es1 es2
-    | otherwise -> returnS failedExpr
+    | otherwise -> return failedExpr
   [e1, e2]
-    | all (== trueExpr) es' -> returnS trueExpr
-    | any (==  failedExpr) es' -> returnS failedExpr
+    | all (== trueExpr) es' -> return trueExpr
+    | any (==  failedExpr) es' -> return failedExpr
     | isVar e1                 -> unifyVar False f [e1,e2]
     | isVar e2                 -> unifyVar True  f [e2,e1]
     | otherwise                -> peArgs f es [1,2]
@@ -345,8 +345,8 @@ peBuiltinCAnd :: QName -> [Expr] -> PEM Expr
 peBuiltinCAnd f es = case es of
   [e1, e2]  | e1' == trueExpr    -> peval e2
             | e2' == trueExpr    -> peval e1
-            | e1' == failedExpr  -> returnS failedExpr
-            | e2' == failedExpr  -> returnS failedExpr
+            | e1' == failedExpr  -> return failedExpr
+            | e2' == failedExpr  -> return failedExpr
             | otherwise          -> peArgs f es [1,2]
             where e1' = delSQ e1
                   e2' = delSQ e2
@@ -356,7 +356,7 @@ peBuiltinCAnd f es = case es of
 --extend to floats and to more operators..
 peBuiltinArith :: QName -> [Expr] -> PEM Expr
 peBuiltinArith f es = case es of
-  [Lit (Intc i1), Lit (Intc i2)] -> returnS $ peArith i1 i2
+  [Lit (Intc i1), Lit (Intc i2)] -> return $ peArith i1 i2
   [_,_]                          -> peArgs f es [1,2]
   _ -> error "PartEval.peBuiltinArith"
  where
@@ -372,7 +372,7 @@ peBuiltinArith f es = case es of
 -- Evaluate function arguments
 peArgs :: QName -> [Expr] -> [Int] -> PEM Expr
 peArgs f es is = case floatCase f [] zipped of
-    Just e' -> returnS $ topSQ e'
+    Just e' -> return $ topSQ e'
     Nothing -> peEvalArgs f [] es
   where zipped = zipWith (\i e -> (i `elem` is, e)) [1..] es
 
@@ -385,10 +385,10 @@ floatCase f les ((mayFloat, e) : ies) = case e of
   where subCase be = Comb FuncCall f (les ++ be : map snd ies)
 
 peEvalArgs :: QName -> [Expr] -> [Expr] -> PEM Expr
-peEvalArgs f les []     = returnS $ Comb FuncCall f les
-peEvalArgs f les (e:es) = peval e >+= \new ->
+peEvalArgs f les []     = return $ Comb FuncCall f les
+peEvalArgs f les (e:es) = peval e >>= \new ->
   if e == new then peEvalArgs f (les ++ [e]) es
-              else returnS $ topSQ $ Comb FuncCall f (les ++ new : es)
+              else return $ topSQ $ Comb FuncCall f (les ++ new : es)
 
 -- ---------------------------------------------------------------------------
 -- Constructing expressions

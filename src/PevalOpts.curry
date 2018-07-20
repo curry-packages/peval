@@ -9,14 +9,15 @@ module PevalOpts
   , Semantics (..), ProceedMode (..), ColorMode (..), getOpts
   ) where
 
-import IO            (hIsTerminalDevice, hPutStrLn, stderr, stdout)
-import ReadShowTerm  (readsQTerm)
-import System        (exitWith, getArgs, getProgName)
+import System.IO          (hIsTerminalDevice, hPutStrLn, stderr, stdout)
+import System.Process     (exitWith)
+import System.Environment (getArgs, getProgName)
+import ReadShowTerm       (readsQTerm)
 
-import GetOpt2       ( OptDescr (..), ArgDescr (..), ArgOrder (Permute), OptErr
-                     , OptTable, addErr, getOpt, onOpts, option, usageInfo)
-import Utils         (rpad)
-
+import GetOpt2            ( OptDescr (..), ArgDescr (..), ArgOrder (Permute)
+                          , OptErr, OptTable, addErr, getOpt
+                          , onOpts, option, usageInfo)
+import Utils              (rpad)
 import Configuration
 
 --- Version information of the partial evaluator.

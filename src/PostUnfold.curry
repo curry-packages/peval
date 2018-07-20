@@ -12,17 +12,17 @@
 --- ----------------------------------------------------------------------------
 module PostUnfold (unAlias, postUnfold, removeCopies) where
 
-import AnsiCodes        (yellow)
-import Function         (first, second)
-import List             (delete, find, partition)
-import Text.Pretty      (Doc, (<+>), ($$), pPrint, text)
-import Utils            (count, countBy)
+import System.Console.ANSI.Codes (yellow)
+import Data.Tuple.Extra          (first, second)
+import Data.List                 (delete, find, partition)
 
+import Text.Pretty      (Doc, (<+>), ($$), pPrint, text)
 import FlatCurry.Types
 import FlatCurryGoodies ( addPartCallArg, funcsInExps, isFuncCall, isPartCall
                         , isVar, maximumVarIndex, mkLet, trExpr
                         , prelApply, prelFailed, prelPEVAL )
 import FlatCurryPretty  (ppExp, indent)
+import Utils            (count, countBy)
 import NameChange       (NameChange, ncRenaming, ncResultants, ncExpr)
 import Normalization    ( simplifyExpr, normalizeFreeExpr
                         , freshResultant, renameResultant)

@@ -18,22 +18,24 @@
 --- --------------------------------------------------------------------------
 module PeNatural (pevalExpr) where
 
-import           AnsiCodes (cyan, magenta)
-import           List      ((\\), elemIndex, find, intersect, isPrefixOf, nub)
-import           Maybe     (fromMaybe, isNothing)
-import qualified Set       (Set, elem, empty, insert, null)
+import System.Console.ANSI.Codes (cyan, magenta)
+import Data.List                 ((\\), elemIndex, find, intersect, isPrefixOf, nub)
+import Data.Maybe                (fromMaybe, isNothing)
+import Prelude            hiding ((<$>))
 
-import Text.Pretty       (pPrint)
+
+import Text.Pretty               (pPrint)
 import FlatCurry.Types
 import FlatCurryGoodies
-import FlatCurryPretty   (ppExp)
-import Heap as H
+import FlatCurryPretty           (ppExp)
 import NDState
-import Normalization     (freshRule, simplifyExpr, normalizeFreeExpr)
-import Output            (assert, colorWith, debug, traceDetail)
-import PevalOpts         (Options (..), ProceedMode (..))
-import Subst             (mkSubst, subst)
-import Utils             (count, indentStr)
+import Normalization             (freshRule, simplifyExpr, normalizeFreeExpr)
+import Output                    (assert, colorWith, debug, traceDetail)
+import PevalOpts                 (Options (..), ProceedMode (..))
+import Subst                     (mkSubst, subst)
+import Utils                     (count, indentStr)
+import qualified Set             (Set, elem, empty, insert, null)
+import Heap 
 
 --- Partial evaluation.
 --- It is crucial that the free variables of the input expression directly
@@ -56,7 +58,7 @@ pevalExpr opts p e = assert (all (< 0) fvs) "PeNatural.pevalExpr"
 --- and integrating referenced bindings into the expression.
 --- In addition, failures directly below non-determinism are eliminated.
 flatND :: Result (Expr, PEState) -> Expr
-flatND (Return (e, s)) = H.dereference (pesHeap s) e
+flatND (Return (e, s)) = Heap.dereference (pesHeap s) e
 flatND (Choice    a b) = mkOr (flatND a) (flatND b)
 
 -- ---------------------------------------------------------------------------
@@ -75,7 +77,7 @@ data PEState = PEState
   { pesOptions  :: Options
   , pesTypes    :: [TypeDecl]
   , pesFuncs    :: [FuncDecl]
-  , pesHeap     :: H.Heap
+  , pesHeap     :: Heap.Heap
   , pesFresh    :: VarIndex
   , pesUnfolded :: Set.Set QName
   , pesTrace    :: Int
@@ -180,42 +182,42 @@ modifyHeap f = modifyS $ \s -> s { pesHeap = f (pesHeap s) }
 
 --- Get the binding for a variable in the current heap.
 getBinding :: VarIndex -> PEM Binding
-getBinding v = H.getHeap v <$> getHeap
+getBinding v = Heap.getHeap v <$> getHeap
 
 --- Bind a variable to marker for a black hole.
 bindHole :: VarIndex -> PEM ()
 bindHole v = assert (v < 0) "PeNatural.bindHole: positive variable"
-           $ modifyHeap (H.bindHole v)
+           $ modifyHeap (Heap.bindHole v)
 
 --- Bind a variable to an expression.
 bindE :: VarIndex -> Expr -> PEM ()
 bindE v e = assert (v < 0) "PeNatural.bindE: positive variable"
-          $ modifyHeap (H.bindExpr v e)
+          $ modifyHeap (Heap.bindExpr v e)
 
 --- Bind a variable to a marker for a free variable.
 bindF :: VarIndex -> PEM ()
 bindF v = assert (v < 0) "PeNatural.bindF: positive variable"
-        $ modifyHeap (H.bindFree v)
+        $ modifyHeap (Heap.bindFree v)
 
 --- Bind a variable to a marker for a unbound parameter variable.
 bindP :: VarIndex -> PEM ()
 bindP v = assert (v < 0) "PeNatural.bindP: positive variable"
-        $ modifyHeap (H.bindParam v)
+        $ modifyHeap (Heap.bindParam v)
 
 --- Bind a variable lazily to an expression.
 bindLE :: VarIndex -> Expr -> PEM ()
 bindLE v e = assert (v < 0) "PeNatural.bindLE: positive variable"
-           $ modifyHeap (H.bindLazyExpr v e)
+           $ modifyHeap (Heap.bindLazyExpr v e)
 
 --- Bind a variable lazily to a marker for a free variable.
 bindLF :: VarIndex -> PEM ()
 bindLF v = assert (v < 0) "PeNatural.bindLF: positive variable"
-           $ modifyHeap (H.bindLazyFree v)
+           $ modifyHeap (Heap.bindLazyFree v)
 
 --- Bind a variable lazily to a marker for a unbound parameter variable.
 bindLP :: VarIndex -> PEM ()
 bindLP v = assert (v < 0) "PeNatural.bindLP: positive variable"
-           $ modifyHeap (H.bindLazyParam v)
+           $ modifyHeap (Heap.bindLazyParam v)
 
 --- Bind the argument of a constructor or function call.
 --- When the argument is *not* a variable, i.e., the call is not flattened,
@@ -275,7 +277,7 @@ nested act =
   nestedAct = modifyHeap restrictToValues >+
               getHeap >+= \h  ->
               act     >+= \e' ->
-              modifyHeap (\h' -> h' `H.without` h) >+
+              modifyHeap (\h' -> h' `Heap.without` h) >+
               returnS e'
   restrictToValues h = [ b | b@(_, BoundVar e) <- h, isValue e]
     where
@@ -947,9 +949,9 @@ occurCheck v e act = getHeap >+= \h ->
 
 --- Determine the set of critical variables for a heap and an expression.
 critVars :: Heap -> Expr -> [VarIndex]
-critVars h (Var        x) = case H.lookupHeap x h of
-  Just (BoundVar  e) -> critVars (H.unbind x h) e
-  Just (LazyBound e) -> critVars (H.unbind x h) e
+critVars h (Var        x) = case Heap.lookupHeap x h of
+  Just (BoundVar  e) -> critVars (Heap.unbind x h) e
+  Just (LazyBound e) -> critVars (Heap.unbind x h) e
   _                  -> [x]
 critVars _ (Lit        _) = []
 critVars h c@(Comb ct _ es) = case getSQ c of

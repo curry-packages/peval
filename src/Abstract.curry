@@ -13,18 +13,19 @@
 --- ----------------------------------------------------------------------------
 module Abstract (abstract) where
 
-import AnsiCodes        (yellow)
-import Function         (on, second)
-import List             (delete, find, maximumBy, sum)
-import Maybe            (isJust)
-import Text.Pretty      (Doc, (<+>), ($$), (<>), equals, pPrint, text, vsep)
-import Utils            (none, sameLength)
+import System.Console.ANSI.Codes (yellow)
+import Data.Function             (on)
+import Data.Tuple.Extra          (second)
+import Data.List                 (delete, find, maximumBy, sum)
+import Data.Maybe                (isJust)
 
+import Text.Pretty      (Doc, (<+>), ($$), (<>), equals, pPrint, text, vsep)
 import FlatCurry.Types
 import FlatCurryGoodies ( branchExprs, completePartCall, isVar, isConsCall
                         , onBranchExps, prelApply, prelude, samePattern, sq
                         , sq', subExprs, isFailed, funcName, getSQ)
 import FlatCurryPretty  (ppExp, indent)
+import Utils            (none, sameLength)
 import Instance         (instanceWith, instanceOf, msg)
 import Normalization    (eqNorm, normalizeExpr)
 import Output           (assert, colorWith, debug, traceDetail)

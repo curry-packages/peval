@@ -6,8 +6,8 @@
 --- --------------------------------------------------------------------------
 module NameChange (NameChange, ncRenaming, ncResultants, ncFunc, ncExpr) where
 
-import Function  (second)
-import Maybe     (fromMaybe)
+import Data.Tuple.Extra  (second)
+import Data.Maybe        (fromMaybe)
 
 import FlatCurry.Types
 import PevalBase (FunLhs, Renaming, Resultant)

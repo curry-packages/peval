@@ -6,10 +6,10 @@
 --- ----------------------------------------------------------------------------
 module Output where
 
-import IO        (hPutStrLn, stderr)
-import List      (intercalate)
-import System    (exitWith)
-import Unsafe    (unsafePerformIO)
+import System.Process   (exitWith)
+import System.IO        (hPutStrLn, stderr)
+import System.IO.Unsafe (unsafePerformIO)
+import Data.List        (intercalate)
 
 import PevalOpts (Options (..), ColorMode (..), Verbosity (..))
 

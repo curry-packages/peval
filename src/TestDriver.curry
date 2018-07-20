@@ -19,21 +19,22 @@
 --- ----------------------------------------------------------------------------
 module TestDriver where
 
-import AnsiCodes     (green, magenta, red, yellow)
-import Char          (toLower, toUpper)
-import Directory     (getDirectoryContents, doesDirectoryExist, doesFileExist)
-import FilePath      ( FilePath, (</>), (<.>), dropExtension, takeBaseName
-                     , takeDirectory, takeExtension )
-import IO            (hFlush, hIsTerminalDevice, hPutStrLn, stderr, stdout)
-import IOExts        (evalCmd)
-import List          (intercalate, last, maximum, nub, sortBy)
-import Read          (readInt)
-import System        (exitWith, getArgs, getProgName)
+import System.Console.ANSI.Codes (green, magenta, red, yellow)
+import Data.Char                 (toLower, toUpper)
+import Data.List                 (intercalate, last, maximum, nub, sortBy)
+import System.Directory          ( getDirectoryContents, doesDirectoryExist
+                                 , doesFileExist )
+import System.FilePath           ( FilePath, (</>), (<.>), dropExtension
+                                 , takeBaseName, takeDirectory, takeExtension )
+import System.IO                 ( hFlush, hIsTerminalDevice, hPutStrLn
+                                 , stderr, stdout )
+import System.Process            (exitWith, getArgs, getProgName)
+import IOExts                    (evalCmd)
 
-import GetOpt2       ( OptDescr (..), ArgDescr (..), ArgOrder (Permute), OptErr
-                     , OptTable, getOpt, onOpts, option, usageInfo )
-import Utils         ((+\+), count, countBy, indentStr, lpad, rpad)
-
+import GetOpt2                   ( OptDescr (..), ArgDescr (..)
+                                 , ArgOrder (Permute), OptErr, OptTable
+                                 , getOpt, onOpts, option, usageInfo )
+import Utils                     ((+\+), count, countBy, indentStr, lpad, rpad)
 import Configuration
 
 -- -----------------------------------------------------------------------------

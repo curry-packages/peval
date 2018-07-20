@@ -25,9 +25,8 @@ module Normalization
   , renameResultant, renameFuncDecl, renameFreeExpr, renameExpr, renameExprSubst
   ) where
 
-import Function         (second)
-import List             (intersect, mapAccumL, partition)
-import Utils            (count, sameLength)
+import Data.Tuple.Extra (second)
+import Data.List        (intersect, mapAccumL, partition)
 
 import FlatCurry.Types
 import FlatCurryGoodies ( addPartCallArg, eqPattern, failedExpr, freeVars
@@ -37,6 +36,7 @@ import FlatCurryGoodies ( addPartCallArg, eqPattern, failedExpr, freeVars
                         , mkCase, mkFree, mkLet, mkOr, patVars, sq
                         , prelApply, prelCond, prelCond', trExpr)
 import Output           (assert)
+import Utils            (count, sameLength)
 import PevalBase        (Resultant)
 -- import SCC              (scc)
 import Subst            (mkSubst, singleSubst, subst, varSubst)
