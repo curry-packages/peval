@@ -5,12 +5,11 @@
 --- by Elvira Albert, German Vidal (UPV), and Michael Hanus (CAU Kiel).
 ---
 --- @author  Björn Peemöller and the authors declared above
---- @version April 2015
+--- @version December 2018
 --- ----------------------------------------------------------------------------
 module peval (main) where
 
 import AnsiCodes                 (green)
-import Distribution              (inCurrySubdir)
 import FilePath                  ( FilePath, (<.>), dropExtension
                                  , replaceBaseName, takeBaseName, takeDirectory)
 import Function                  ((***), first, second)
@@ -38,6 +37,8 @@ import PevalOpts                 ( Options (..), Semantics (..)
                                  , Abstraction (None), getOpts)
 import PostUnfold                (unAlias, postUnfold, removeCopies)
 import Renaming                  (renameExpr)
+
+import System.CurryPath          (inCurrySubdir)
 
 -- ---------------------------------------------------------------------------
 -- main program
