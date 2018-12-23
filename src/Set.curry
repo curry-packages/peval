@@ -21,7 +21,7 @@ type Set a = RBT.RedBlackTree a
 
 --- Return an empty set.
 empty :: Ord a => Set a
-empty = RBT.empty (==) (==)
+empty = RBT.empty (==) (==) (<)
 
 --- Test for an empty set.
 null :: Set _ -> Bool
