@@ -9,7 +9,6 @@
 --- ----------------------------------------------------------------------------
 module peval (main) where
 
-import AnsiCodes                 (green)
 import FilePath                  ( FilePath, (<.>), dropExtension
                                  , replaceBaseName, takeBaseName, takeDirectory)
 import Function                  ((***), first, second)
@@ -20,6 +19,7 @@ import System                    (setEnviron)
 
 import FlatCurry.Annotated.Goodies (unAnnFuncDecl)
 import FlatCurry.Annotated.TypeInference (TypeEnv, inferNewFunctions)
+import System.Console.ANSI.Codes ( green )
 
 import Abstract                  (abstract)
 import FlatCurry.Types

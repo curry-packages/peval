@@ -6,17 +6,18 @@
 --- duplicate non-determinism since it does implement any sharing.
 ---
 --- @author  Björn Peemöller
---- @version September 2015
+--- @version December 2015
 --- --------------------------------------------------------------------------
 module PeRLNT (pevalExpr) where
 
-import AnsiCodes        (magenta)
 import Function         (second)
 import List             (find, intersect, maximum)
 import Maybe            (fromJust)
 import Text.Pretty      (pPrint)
 
 import FlatCurry.Types
+import System.Console.ANSI.Codes ( magenta )
+
 import FlatCurryGoodies
 import FlatCurryPretty  (ppExp)
 import Normalization    (freshRule)

@@ -6,11 +6,10 @@
 --- Note that function calls are not directly renamed since they are expected
 --- to be annotated by angle brackets by the unfolding operation.
 ---
---- @version September 2015
+--- @version December 2018
 --- ----------------------------------------------------------------------------
 module Renaming (renameExpr) where
 
-import AnsiCodes        (yellow)
 import Function         (second)
 import List             (find)
 
@@ -18,6 +17,8 @@ import Text.Pretty      (($$), (<+>), pPrint, text)
 import Utils            (dropLast)
 
 import FlatCurry.Types
+import System.Console.ANSI.Codes ( yellow )
+
 import FlatCurryGoodies (completePartCall, onBranchExps, sq', getSQ)
 import FlatCurryPretty  (ppExp, indent)
 import Instance         (instanceWith)

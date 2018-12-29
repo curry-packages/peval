@@ -9,11 +9,10 @@
 --- re-evaluation of expressions or the loss of the more specific results.
 ---
 --- @author  Elvira Albert, German Vidal, Michael Hanus, Björn Peemöller
---- @version September 2015
+--- @version December 2018
 --- ----------------------------------------------------------------------------
 module Abstract (abstract) where
 
-import AnsiCodes        (yellow)
 import Function         (on, second)
 import List             (delete, find, maximumBy, sum)
 import Maybe            (isJust)
@@ -24,6 +23,8 @@ import FlatCurry.Types
 import FlatCurryGoodies ( branchExprs, completePartCall, isVar, isConsCall
                         , onBranchExps, prelApply, prelude, samePattern, sq
                         , sq', subExprs, isFailed, funcName, getSQ)
+import System.Console.ANSI.Codes ( yellow )
+
 import FlatCurryPretty  (ppExp, indent)
 import Instance         (instanceWith, instanceOf, msg)
 import Normalization    (eqNorm, normalizeExpr)

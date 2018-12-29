@@ -15,11 +15,10 @@
 --- are then compared for equality.
 ---
 --- @author  Björn Peemöller
---- @version September 2015
+--- @version December 2018
 --- ----------------------------------------------------------------------------
 module TestDriver where
 
-import AnsiCodes     (green, magenta, red, yellow)
 import Char          (toLower, toUpper)
 import Directory     (getDirectoryContents, doesDirectoryExist, doesFileExist)
 import FilePath      ( FilePath, (</>), (<.>), dropExtension, takeBaseName
@@ -29,6 +28,8 @@ import IOExts        (evalCmd)
 import List          (intercalate, last, maximum, nub, sortBy)
 import Read          (readInt)
 import System        (exitWith, getArgs, getProgName)
+
+import System.Console.ANSI.Codes ( green, magenta, red, yellow )
 
 import GetOpt2       ( OptDescr (..), ArgDescr (..), ArgOrder (Permute), OptErr
                      , OptTable, getOpt, onOpts, option, usageInfo )

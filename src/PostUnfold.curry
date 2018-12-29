@@ -8,27 +8,28 @@
 --- evaluation mechanism.
 ---
 --- @author Elvira Albert, German Vidal, Michael Hanus, Björn Peemöller
---- @version September 2015
+--- @version December 2018
 --- ----------------------------------------------------------------------------
 module PostUnfold (unAlias, postUnfold, removeCopies) where
 
-import AnsiCodes        (yellow)
 import Function         (first, second)
 import List             (delete, find, partition)
 import Text.Pretty      (Doc, (<+>), ($$), pPrint, text)
 import Utils            (count, countBy)
 
 import FlatCurry.Types
+import System.Console.ANSI.Codes ( yellow )
+
 import FlatCurryGoodies ( addPartCallArg, funcsInExps, isFuncCall, isPartCall
                         , isVar, maximumVarIndex, mkLet, trExpr
                         , prelApply, prelFailed, prelPEVAL )
-import FlatCurryPretty  (ppExp, indent)
-import NameChange       (NameChange, ncRenaming, ncResultants, ncExpr)
+import FlatCurryPretty  ( ppExp, indent )
+import NameChange       ( NameChange, ncRenaming, ncResultants, ncExpr )
 import Normalization    ( simplifyExpr, normalizeFreeExpr
                         , freshResultant, renameResultant)
-import Output           (colorWith, traceDetail)
-import PevalBase        (Renaming, Resultant, ppResultant, mkFuncCall)
-import PevalOpts        (Options)
+import Output           ( colorWith, traceDetail )
+import PevalBase        ( Renaming, Resultant, ppResultant, mkFuncCall )
+import PevalOpts        ( Options )
 
 -- -----------------------------------------------------------------------------
 -- Interface

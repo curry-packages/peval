@@ -14,17 +14,18 @@
 ---    would result in non-termination.
 ---
 --- @author Björn Peemöller
---- @version September 2015
+--- @version December 2018
 --- --------------------------------------------------------------------------
 module PeNatural (pevalExpr) where
 
-import           AnsiCodes (cyan, magenta)
 import           List      ((\\), elemIndex, find, intersect, isPrefixOf, nub)
 import           Maybe     (fromMaybe, isNothing)
 import qualified Set       (Set, elem, empty, insert, null)
 
 import Text.Pretty       (pPrint)
 import FlatCurry.Types
+import System.Console.ANSI.Codes ( cyan, magenta )
+
 import FlatCurryGoodies
 import FlatCurryPretty   (ppExp)
 import Heap as H
