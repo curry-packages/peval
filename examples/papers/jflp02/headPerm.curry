@@ -1,6 +1,7 @@
 import Profile
-import SetFunctions
 import Unsafe
+
+import Control.SetFunctions
 
 perm []     = []
 perm (x:xs) = insert x (perm xs)

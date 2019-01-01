@@ -1,6 +1,7 @@
 import Profile
-import SetFunctions
 import Unsafe
+
+import Control.SetFunctions
 
 foldr ::  (a -> b -> b) -> b -> [a] -> b
 foldr _ z []     = z

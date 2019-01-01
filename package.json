@@ -11,6 +11,7 @@
         "flatcurry"          : ">= 2.0.0",
         "flatcurry-annotated": ">= 2.0.0",
         "redblacktree"       : ">= 0.0.1",
+        "setfunctions"       : ">= 0.0.1",
         "wl-pprint"          : ">= 0.0.1"
     },
     "compilerCompatibility": {
