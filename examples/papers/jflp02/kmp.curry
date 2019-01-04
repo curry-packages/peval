@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 
 data Letter = A | B
 

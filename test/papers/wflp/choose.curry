@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 import Unsafe
 
 import Control.SetFunctions

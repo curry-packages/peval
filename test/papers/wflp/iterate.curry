@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 
 map :: (a -> b) -> [a] -> [b]
 map _ []     = []

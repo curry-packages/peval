@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 
 (++) :: [t] -> [t] -> [t]
 []     ++ x  = x

@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 
 foldr ::  (a -> b -> b) -> b -> [a] -> b
 foldr _ z []     = z

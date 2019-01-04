@@ -1,4 +1,4 @@
-import Profile
+import Debug.Profile
 
 data Nat = Z | S Nat
 
