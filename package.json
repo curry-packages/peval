@@ -24,7 +24,7 @@
         "main": "peval"
     },
     "source": {
-        "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/peval.git",
+        "git": "https://github.com/curry-packages/peval.git",
         "tag": "$version"
     }
 }
